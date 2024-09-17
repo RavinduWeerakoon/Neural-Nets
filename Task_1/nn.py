@@ -26,9 +26,10 @@ def categorical_crossentropy_derivative(y_true, y_pred):
 
 
 class BaseNeuralNetwork:
-    def __init__(self, layer_sizes, initial_weights=None, initial_biases=None):
+    def __init__(self, initial_weights=None, initial_biases=None, layer_sizes=None):
         self.layer_sizes = layer_sizes
-        self.num_layers = len(layer_sizes)
+        if layer_sizes:
+            self.num_layers = len(layer_sizes)
         self.layer_initializer_from_initial(layer_sizes, initial_weights, initial_biases)
         self.gead_w = []
         self.grad_b = []
@@ -42,14 +43,38 @@ class BaseNeuralNetwork:
             with open(weights_file, 'r') as wf:
                 reader = csv.reader(wf)
                 weights = []
-                for layer in layer_sizes[:-1]:
-                    l_weights = []
-                    for i in range(layer):
-                        row = next(reader)
-                        l_weights.append(np.array(row[1:], dtype=np.float32))
-                    l_weights = np.array(l_weights)
-                    weights.append(l_weights)
+                layer_sizes = []
+                current_layer = None
+                current_weights = []
+
+                for row in reader:
+                    layer_info = row[0]
+                    parts = layer_info.split(' ')
+                    layer_from = int(parts[2][5:])
+                    layer_to = int(parts[4][5:])
+
+                    if current_layer is None:
+                        current_layer = layer_from
+                        # layer_sizes.append(len(row) - 1)  # Input layer size
+
+                    if current_layer != layer_from:
+                        layer_sizes.append(len(current_weights))  # Previous layer size
+                        weights.append(np.array(current_weights))
+                        current_weights = []
+                        current_layer = layer_from
+
+                    current_weights.append(np.array(row[1:], dtype=np.float32))
+
+                # Append the metadata about the last layer
+                layer_sizes.append(len(current_weights))
+                layer_sizes.append(len(current_weights[0]))
+                #adding the num layers
+                self.num_layers = len(layer_sizes)
+                weights.append(np.array(current_weights))
+
                 self.weights = weights
+                self.layer_sizes = layer_sizes
+#                print(self.layer_sizes)
             
             with open(biases_file, 'r') as bf:
                 reader = csv.reader(bf)
@@ -141,16 +166,16 @@ if __name__ == "__main__":
     y = np.array([[0, 0, 0, 1]])
 
     # Define the network architecture
-    layer_sizes = [14, 100, 40, 4]  # Input layer, two hidden layers, output layer with 4 neurons
+    #layer_sizes = [14, 100, 40, 4]  #Input layer, two hidden layers, output layer with 4 neurons
 
     # Training parameters
     epochs = 10
     learning_rate = 0.1
 
     # Create and train the neural network
-    nn = NeuralNetwork(layer_sizes, "NN/Task_1/a/w.csv" , "NN/Task_1/a/b.csv")
-    activations = nn.forward_propagation(X)
-    nn.backward_propagation(X, y, activations, learning_rate)
-    nn.save_gradients("true-dw.csv", "true-db.csv")
+    nn = NeuralNetwork("NN/Task_1/a/w.csv" , "NN/Task_1/a/b.csv")
+    # activations = nn.forward_propagation(X)
+    # nn.backward_propagation(X, y, activations, learning_rate)
+    # nn.save_gradients("true-dw.csv", "true-db.csv")
     # print(len(nn.grad_w))
     # print(nn.grad_b)
