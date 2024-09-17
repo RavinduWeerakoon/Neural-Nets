@@ -64,12 +64,12 @@ class BaseNeuralNetwork:
             writer = csv.writer(wf)
             for i in range(len(self.grad_w)):
                 for x in self.grad_w[i]:
-                    temp_row = x.tolist()
+                    temp_row = x
                     writer.writerow(temp_row)
         with open(b, 'w') as bf:
             writer = csv.writer(bf)
             for i in range(len(self.grad_b)):
-                temp_row = self.grad_b[i].tolist()
+                temp_row = self.grad_b[i]
                 writer.writerow(temp_row)
         
         
@@ -85,6 +85,7 @@ class BaseNeuralNetwork:
 class NeuralNetwork(BaseNeuralNetwork):
     def __init__(self, layer_sizes, initial_weights=None, initial_biases=None):
         super().__init__(layer_sizes, initial_weights, initial_biases)
+        self.history = {"training_loss":[]}
 
         
 
@@ -122,9 +123,9 @@ class NeuralNetwork(BaseNeuralNetwork):
         for epoch in range(epochs):
             activations = self.forward_propagation(X)
             self.backward_propagation(X, y, activations, learning_rate)
-            if epoch % 100 == 0:
-                loss = categorical_crossentropy(y, activations[-1])
-                print(f'Epoch {epoch}, Loss: {loss}')
+            loss = categorical_crossentropy(y, activations[-1])
+            self.history["training_loss"].append(loss)
+            print(f'Epoch {epoch}, Loss: {loss}')
 
 # def read_data_point(filepath):
 
@@ -136,8 +137,8 @@ if __name__ == "__main__":
     #               [0, 1, 1,1,1,1,1,1,0,0,0,1,0,1]])
     # y = np.array([[1, 0, 0, 0],
     #               [0, 1, 0, 0]])
-    X = np.array([[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1]], dtype=np.float32)
-    y = np.array([[0, 0, 0, 1]], dtype=np.float32)
+    X = np.array([[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1]])
+    y = np.array([[0, 0, 0, 1]])
 
     # Define the network architecture
     layer_sizes = [14, 100, 40, 4]  # Input layer, two hidden layers, output layer with 4 neurons
@@ -147,8 +148,9 @@ if __name__ == "__main__":
     learning_rate = 0.1
 
     # Create and train the neural network
-    nn = NeuralNetwork(layer_sizes, "Assignment_1/Task_1/a/w.csv" , "Assignment_1/Task_1/a/b.csv")
+    nn = NeuralNetwork(layer_sizes, "NN/Task_1/a/w.csv" , "NN/Task_1/a/b.csv")
     activations = nn.forward_propagation(X)
     nn.backward_propagation(X, y, activations, learning_rate)
+    nn.save_gradients("true-dw.csv", "true-db.csv")
     # print(len(nn.grad_w))
-    print(nn.grad_b)
+    # print(nn.grad_b)
