@@ -8,8 +8,8 @@ zip_ref = zipfile.ZipFile(ID+'.zip', 'r')
 zip_ref.extractall('.')
 zip_ref.close()
 
-truth_path = 'the_truth_path' #change truth_path = 'b' for verification
-file_name = ['Task_1/dw.csv', 'Task_1/db.csv']
+truth_path = 'NN/Task_1/a' #change truth_path = 'b' for verification
+file_name = ['true-dw.csv', 'true-db.csv']
 true_file = ['true-dw.csv', 'true-db.csv']
 threshold = 0.05
 

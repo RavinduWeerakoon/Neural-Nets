@@ -1,5 +1,6 @@
 import numpy as np
 import csv
+import pandas as pd
 
 # Activation functions and their derivatives
 def sigmoid(x):
@@ -117,7 +118,7 @@ class BaseNeuralNetwork:
 
 class NeuralNetwork(BaseNeuralNetwork):
     def __init__(self, layer_sizes, initial_weights=None, initial_biases=None):
-        super().__init__(layer_sizes, initial_weights, initial_biases)
+        super().__init__(initial_weights, initial_biases, layer_sizes)
         self.history = {}
 
         
@@ -176,28 +177,29 @@ class NeuralNetwork(BaseNeuralNetwork):
         self.history["train_accuracy"] = train_accuracy
         self.history["test_accuracy"] = test_accuracy
 
-# def read_data_point(filepath):
-
 
 # Example usage
 if __name__ == "__main__":
 
-    X = np.array([[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1], [-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1]])
-    y = np.array([[0, 0, 0, 1], [0, 0, 1, 0]])
+    # X = np.array([[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1], [-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, -1]])
+    # y = np.array([[0, 0, 0, 1], [0, 0, 1, 0]])
 
-    # Define the network architecture
-    #layer_sizes = [14, 100, 40, 4]  #Input layer, two hidden layers, output layer with 4 neurons
-
-    # Training parameters
-    epochs = 10
+    layer_sizes = [14, 100, 40,4]
+    epochs = 2
     learning_rate = 0.1
+    nn = NeuralNetwork(layer_sizes)
+    trainX = pd.read_csv("x_train.csv", header=None)
+    trainY = pd.read_csv("y_train.csv", header=None)
+    testX = pd.read_csv("x_test.csv", header=None)
+    testY = pd.read_csv("y_test.csv", header=None)
 
-    # Create and train the neural network
-    nn = NeuralNetwork("NN/Task_1/b/w-14-28-4.csv" , "NN/Task_1/b/b-14-28-4.csv")
-    #activations = nn.forward_propagation(X)
-    
-    # #print(activations)
-    # nn.backward_propagation(X, y, activations, learning_rate)
-    # nn.save_gradients("true-dw.csv", "true-db.csv")
-    # # print(len(nn.grad_w))
-    # # print(nn.grad_b)
+    # Convert testY to one-hot encoding
+    num_classes = len(np.unique(testY))
+    testY_one_hot = np.eye(num_classes)[testY.astype(int).values.flatten()]
+
+    # Convert trainY to one-hot encoding
+    trainY_one_hot = np.eye(num_classes)[trainY.astype(int).values.flatten()]
+
+    nn.train(trainX.values, trainY_one_hot, epochs, learning_rate, testX.values, testY_one_hot)
+
+
