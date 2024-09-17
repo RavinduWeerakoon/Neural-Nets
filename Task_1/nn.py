@@ -85,13 +85,13 @@ class BaseNeuralNetwork:
                     self.biases = biases
 
     def save_gradients(self, w,b):
-        with open(w, 'w') as wf:
+        with open(w, 'w', newline='') as wf:
             writer = csv.writer(wf)
             for i in range(len(self.grad_w)):
                 for x in self.grad_w[i]:
                     temp_row = x
                     writer.writerow(temp_row)
-        with open(b, 'w') as bf:
+        with open(b, 'w', newline='') as bf:
             writer = csv.writer(bf)
             for i in range(len(self.grad_b)):
                 temp_row = self.grad_b[i]
@@ -106,6 +106,7 @@ class BaseNeuralNetwork:
     def get_biases(self):
         print([s.shape for s in self.biases])
         return self.biases
+
 
 class NeuralNetwork(BaseNeuralNetwork):
     def __init__(self, layer_sizes, initial_weights=None, initial_biases=None):
@@ -157,11 +158,7 @@ class NeuralNetwork(BaseNeuralNetwork):
 
 # Example usage
 if __name__ == "__main__":
-    # Example dataset (X: inputs, y: one-hot encoded outputs)
-    # X = np.array([[0, 0, 1,1,1,1,1,1,0,0,0,1,0,1],
-    #               [0, 1, 1,1,1,1,1,1,0,0,0,1,0,1]])
-    # y = np.array([[1, 0, 0, 0],
-    #               [0, 1, 0, 0]])
+
     X = np.array([[-1, 1, 1, 1, -1, -1, 1, -1, 1, 1, -1, -1, 1, 1]])
     y = np.array([[0, 0, 0, 1]])
 
@@ -174,8 +171,8 @@ if __name__ == "__main__":
 
     # Create and train the neural network
     nn = NeuralNetwork("NN/Task_1/a/w.csv" , "NN/Task_1/a/b.csv")
-    # activations = nn.forward_propagation(X)
-    # nn.backward_propagation(X, y, activations, learning_rate)
-    # nn.save_gradients("true-dw.csv", "true-db.csv")
+    activations = nn.forward_propagation(X)
+    nn.backward_propagation(X, y, activations, learning_rate)
+    nn.save_gradients("true-dw.csv", "true-db.csv")
     # print(len(nn.grad_w))
     # print(nn.grad_b)
